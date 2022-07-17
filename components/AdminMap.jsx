@@ -1,6 +1,8 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Box } from '@chakra-ui/react';
 import Map, { GeolocateControl, Source, Layer } from 'react-map-gl';
+import { database } from '../firebase';
+import { ref, set } from 'firebase/database';
 
 const AdminMap = () => {
   const [isUserLocation, setIsUserLocation] = useState([]);
@@ -8,13 +10,12 @@ const AdminMap = () => {
 
   useEffect(() => {
     console.log(isUserLocation);
-    {
-      mapRef.current ? console.log(mapRef.current) : 'loading';
-    }
   }, [isUserLocation, mapRef]);
 
   const updateUserLocation = useCallback(() => {
-    console.log('User moved!');
+    set(ref(database, '/userLocation'), {
+      isUserLocation,
+    });
   }, [isUserLocation]);
 
   const geojson = {
@@ -109,7 +110,7 @@ const AdminMap = () => {
         left='10px'
         zIndex='overlay'
       >
-        <Box key={index}>{loc ? loc.length : 'loading'}</Box>
+        <Box>{isUserLocation.length}</Box>
       </Box>
     </Box>
   );
