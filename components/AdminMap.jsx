@@ -109,9 +109,7 @@ const AdminMap = () => {
         left='10px'
         zIndex='overlay'
       >
-        {isUserLocation.map((loc, index) => (
-          <Box key={index}>{loc ? loc.length : 'loading'}</Box>
-        ))}
+        <Box key={index}>{loc ? loc.length : 'loading'}</Box>
       </Box>
     </Box>
   );

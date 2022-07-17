@@ -10,6 +10,7 @@ import { getDatabase } from 'firebase/database';
 const firebaseConfig = {
   apiKey: 'AIzaSyB8pbyRY4ZpeThJY4y1OwrKDC631kGJFiI',
   authDomain: 'maine-fe60f.firebaseapp.com',
+  databaseURL: 'https://maine-fe60f-default-rtdb.firebaseio.com',
   projectId: 'maine-fe60f',
   storageBucket: 'maine-fe60f.appspot.com',
   messagingSenderId: '597881893189',
@@ -20,3 +21,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// Initialize Realtime Database and get a reference to the service
+const database = getDatabase(app);
