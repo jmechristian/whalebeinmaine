@@ -112,7 +112,7 @@ const AdminMap = () => {
       >
         {isUserLocation.map((loc, index) => (
           <Box key={index}>
-            {loc ? loc[0] : 'loading'} , {loc ? loc[1] : 'loading'}
+            {loc ? loc[0] : 'loading'}, {loc ? loc[1] : 'loading'}
           </Box>
         ))}
       </Box>
