@@ -10,7 +10,9 @@ const AdminMap = () => {
   const mapRef = useRef();
 
   useEffect(() => {
-    readUserLocations();
+    if (isUserLocation != null || isUserLocation.length > 0) {
+      readUserLocations();
+    }
   }, [isUserLocation]);
 
   const readUserLocations = () => {
@@ -121,7 +123,7 @@ const AdminMap = () => {
         left='10px'
         zIndex='overlay'
       >
-        <Box>{isUserLocation.length}</Box>
+        <Box>{isUserLocation ? isUserLocation.length : 'Move!'}</Box>
       </Box>
     </Box>
   );
