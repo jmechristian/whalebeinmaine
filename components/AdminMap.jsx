@@ -2,20 +2,31 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Box } from '@chakra-ui/react';
 import Map, { GeolocateControl, Source, Layer } from 'react-map-gl';
 import { database } from '../firebase';
-import { ref, set } from 'firebase/database';
+import { ref, set, onValue } from 'firebase/database';
 
 const AdminMap = () => {
   const [isUserLocation, setIsUserLocation] = useState([]);
+  const [isGeometry, setIsGeometry] = useState([]);
   const mapRef = useRef();
 
   useEffect(() => {
-    console.log(isUserLocation);
-  }, [isUserLocation, mapRef]);
+    readUserLocations();
+  }, [isUserLocation]);
+
+  const readUserLocations = () => {
+    const locationRef = ref(database, 'userLocation/isUserLocation');
+    onValue(locationRef, (snapshot) => {
+      const data = snapshot.val();
+      setIsGeometry(data);
+    });
+  };
 
   const updateUserLocation = useCallback(() => {
     set(ref(database, '/userLocation'), {
       isUserLocation,
     });
+
+    setIsGeometry(isUserLocation);
   }, [isUserLocation]);
 
   const geojson = {
@@ -25,7 +36,7 @@ const AdminMap = () => {
         type: 'Feature',
         properties: {},
         geometry: {
-          coordinates: [isUserLocation],
+          coordinates: isGeometry,
           type: 'LineString',
         },
       },
