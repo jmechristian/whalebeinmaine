@@ -75,7 +75,6 @@ const AdminMap = () => {
           longitude: -77.438267,
           latitude: 39.0431092,
           zoom: 11,
-          pitch: 60,
         }}
         mapStyle='mapbox://styles/mapbox/streets-v9'
         mapboxAccessToken='pk.eyJ1Ijoiam1lY2hyaXN0aWFuIiwiYSI6ImNsNW9udXBqNzBodDMzam92ZjR1cDNuM3oifQ.1XHdUAzgu6fisMcaHyPTnA'
@@ -102,7 +101,14 @@ const AdminMap = () => {
           <Layer {...layerStyle} />
         </Source>
       </Map>
-      <Box height='-moz-max-content' backgroundColor={'white'}>
+      <Box
+        height='-moz-max-content'
+        backgroundColor={'white'}
+        position='absolute'
+        top='10px'
+        left='10px'
+        zIndex='overlay'
+      >
         {isUserLocation.map((loc, index) => (
           <Box key={index}>{loc ? loc.length : 'loading'}</Box>
         ))}
