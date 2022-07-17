@@ -102,18 +102,9 @@ const AdminMap = () => {
           <Layer {...layerStyle} />
         </Source>
       </Map>
-      <Box
-        height='-moz-max-content'
-        position={'absolute'}
-        top='10px'
-        left='10px'
-        zIndex={'overlay'}
-        backgroundColor={'white'}
-      >
+      <Box height='-moz-max-content' backgroundColor={'white'}>
         {isUserLocation.map((loc, index) => (
-          <Box key={index}>
-            {loc ? loc[0] : 'loading'}, {loc ? loc[1] : 'loading'}
-          </Box>
+          <Box key={index}>{loc ? loc.length : 'loading'}</Box>
         ))}
       </Box>
     </Box>
