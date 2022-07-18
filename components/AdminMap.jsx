@@ -13,15 +13,19 @@ import {
   ModalHeader,
   Input,
 } from '@chakra-ui/react';
-import Map, { GeolocateControl, Source, Layer } from 'react-map-gl';
+import Map, { GeolocateControl, Source, Layer, Marker } from 'react-map-gl';
 import { database } from '../firebase';
 import { ref, set, onValue } from 'firebase/database';
+import MarkerPin from './MarkerPin';
+import MarkerDrawer from './MarkerDrawer';
 
 const AdminMap = () => {
   const [isUserLocation, setIsUserLocation] = useState([]);
   const [isGeometry, setIsGeometry] = useState([]);
   const [isLive, setIsLive] = useState(false);
+  const [draftPin, setDraftPin] = useState(null);
   const [sessionName, setSessionName] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const mapRef = useRef();
@@ -111,6 +115,7 @@ const AdminMap = () => {
           latitude: 39.0431092,
           zoom: 11,
         }}
+        onClick={(event) => setDraftPin(event.lngLat)}
         mapStyle='mapbox://styles/mapbox/streets-v9'
         mapboxAccessToken='pk.eyJ1Ijoiam1lY2hyaXN0aWFuIiwiYSI6ImNsNW9udXBqNzBodDMzam92ZjR1cDNuM3oifQ.1XHdUAzgu6fisMcaHyPTnA'
         ref={mapRef}
@@ -136,6 +141,15 @@ const AdminMap = () => {
           data={geojson}
         >
           <Layer {...layerStyle} />
+          {draftPin && (
+            <Marker
+              latitude={draftPin.lat}
+              longitude={draftPin.lng}
+              onClick={() => setDrawerOpen(true)}
+            >
+              <MarkerPin />
+            </Marker>
+          )}
         </Source>
       </Map>
       <Box
@@ -189,6 +203,11 @@ const AdminMap = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <MarkerDrawer
+        session={sessionName}
+        drawerOpen={drawerOpen}
+        drawerClose={() => setDrawerOpen(false)}
+      />
     </Box>
   );
 };
