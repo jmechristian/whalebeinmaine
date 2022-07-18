@@ -1,5 +1,18 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { Box } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  useDisclosure,
+  Modal,
+  ModalBody,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  ModalFooter,
+  ModalHeader,
+  Input,
+} from '@chakra-ui/react';
 import Map, { GeolocateControl, Source, Layer } from 'react-map-gl';
 import { database } from '../firebase';
 import { ref, set, onValue } from 'firebase/database';
@@ -7,26 +20,39 @@ import { ref, set, onValue } from 'firebase/database';
 const AdminMap = () => {
   const [isUserLocation, setIsUserLocation] = useState([]);
   const [isGeometry, setIsGeometry] = useState([]);
+  const [isLive, setIsLive] = useState(false);
+  const [sessionName, setSessionName] = useState('');
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const mapRef = useRef();
+  const geolocateRef = useRef();
 
   useEffect(() => {
-    if (isUserLocation != null || isUserLocation.length > 0) {
+    if (isUserLocation != []) {
       readUserLocations();
+      console.log(isUserLocation);
     }
   }, [isUserLocation]);
 
   const readUserLocations = () => {
-    const locationRef = ref(database, 'userLocation/isUserLocation');
-    onValue(locationRef, (snapshot) => {
-      const data = snapshot.val();
-      setIsGeometry(data);
-    });
+    if (sessionName) {
+      const locationRef = ref(
+        database,
+        `/sessions/${sessionName}/isUserLocation`
+      );
+      onValue(locationRef, (snapshot) => {
+        const data = snapshot.val();
+        setIsGeometry(data);
+      });
+    }
   };
 
   const updateUserLocation = useCallback(() => {
-    set(ref(database, '/userLocation'), {
-      isUserLocation,
-    });
+    if (sessionName != '') {
+      set(ref(database, `/sessions/${sessionName}`), {
+        isUserLocation,
+      });
+    }
 
     setIsGeometry(isUserLocation);
   }, [isUserLocation]);
@@ -78,12 +104,7 @@ const AdminMap = () => {
   };
 
   return (
-    <Box
-      width='100%'
-      height='100%'
-      backgroundColor={'green.900'}
-      position='relative'
-    >
+    <Box width='100%' height='100%' position='relative'>
       <Map
         initialViewState={{
           longitude: -77.438267,
@@ -95,9 +116,10 @@ const AdminMap = () => {
         ref={mapRef}
       >
         <GeolocateControl
+          ref={geolocateRef}
           positionOptions={{ enableHighAccuracy: true }}
-          trackUserLocation={true}
           showUserHeading={true}
+          trackUserLocation={true}
           onGeolocate={(evt) => {
             setIsUserLocation((prevState) => [
               ...prevState,
@@ -105,6 +127,7 @@ const AdminMap = () => {
             ]);
             updateUserLocation();
           }}
+          onTrackUserLocationEnd={() => setIsLive(false)}
         />
         <Source
           id='gradient-line'
@@ -117,14 +140,55 @@ const AdminMap = () => {
       </Map>
       <Box
         height='-moz-max-content'
-        backgroundColor={'white'}
+        backgroundColor={'blue.800'}
+        color={'white'}
         position='absolute'
         top='10px'
         left='10px'
         zIndex='overlay'
       >
-        <Box>{isUserLocation ? isUserLocation.length : 'Move!'}</Box>
+        <Flex alignItems={'center'}>
+          {isLive && <Box px={'4'}>Session: {sessionName}</Box>}
+          <Box>
+            {isLive ? (
+              <Button colorScheme={'red'} borderRadius='none'>
+                LIVE
+              </Button>
+            ) : (
+              <Button colorScheme={'blue'} borderRadius='none' onClick={onOpen}>
+                Start
+              </Button>
+            )}
+          </Box>
+        </Flex>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Session Name</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              value={sessionName}
+              onChange={(e) => setSessionName(e.target.value)}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme='blue'
+              mr={3}
+              onClick={() => {
+                onClose();
+                setIsLive(true);
+                geolocateRef.current.trigger();
+              }}
+            >
+              Start Session
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
