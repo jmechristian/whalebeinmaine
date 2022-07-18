@@ -20,10 +20,17 @@ import MarkerPin from './MarkerPin';
 import MarkerDrawer from './MarkerDrawer';
 
 const AdminMap = () => {
+  const initialView = {
+    longitude: -77.438267,
+    latitude: 39.0431092,
+    zoom: 11,
+  };
+
   const [isUserLocation, setIsUserLocation] = useState([]);
   const [isGeometry, setIsGeometry] = useState([]);
+  const [viewState, setViewState] = useState(initialView);
   const [isLive, setIsLive] = useState(false);
-  const [draftPin, setDraftPin] = useState(null);
+  const [draftPin, setDraftPin] = useState();
   const [sessionName, setSessionName] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -32,9 +39,10 @@ const AdminMap = () => {
   const geolocateRef = useRef();
 
   useEffect(() => {
-    if (isUserLocation != []) {
+    if (isUserLocation.length > 1) {
       readUserLocations();
       console.log(isUserLocation);
+      console.log(sessionName);
     }
   }, [isUserLocation]);
 
@@ -106,6 +114,11 @@ const AdminMap = () => {
       'line-join': 'round',
     },
   };
+  const endLiveStream = () => {
+    geolocateRef.current.trigger();
+    setIsLive(false);
+    setSessionName('');
+  };
 
   return (
     <Box width='100%' height='100%' position='relative'>
@@ -115,6 +128,8 @@ const AdminMap = () => {
           latitude: 39.0431092,
           zoom: 11,
         }}
+        {...viewState}
+        onMove={(event) => setViewState(event.viewState)}
         onClick={(event) => setDraftPin(event.lngLat)}
         mapStyle='mapbox://styles/mapbox/streets-v9'
         mapboxAccessToken='pk.eyJ1Ijoiam1lY2hyaXN0aWFuIiwiYSI6ImNsNW9udXBqNzBodDMzam92ZjR1cDNuM3oifQ.1XHdUAzgu6fisMcaHyPTnA'
@@ -132,7 +147,6 @@ const AdminMap = () => {
             ]);
             updateUserLocation();
           }}
-          onTrackUserLocationEnd={() => setIsLive(false)}
         />
         <Source
           id='gradient-line'
@@ -165,7 +179,11 @@ const AdminMap = () => {
           {isLive && <Box px={'4'}>Session: {sessionName}</Box>}
           <Box>
             {isLive ? (
-              <Button colorScheme={'red'} borderRadius='none'>
+              <Button
+                colorScheme={'red'}
+                borderRadius='none'
+                onClick={endLiveStream}
+              >
                 LIVE
               </Button>
             ) : (
