@@ -34,6 +34,7 @@ const AdminMap = () => {
   const [isLive, setIsLive] = useState(false);
   const [draftPin, setDraftPin] = useState();
   const [sessionName, setSessionName] = useState('');
+  const [sessions, setSessions] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [markers, setMarkers] = useState(null);
   const [imageModalOpen, setImageModalOpen] = useState(null);
@@ -52,6 +53,7 @@ const AdminMap = () => {
 
   useEffect(() => {
     getMarkers();
+    getLocations();
   }, []);
 
   const readUserLocations = () => {
@@ -65,6 +67,16 @@ const AdminMap = () => {
         setIsGeometry(data);
       });
     }
+  };
+
+  const getLocations = () => {
+    const dbMarkerRef = ref(database);
+    get(child(dbMarkerRef, 'sessions'))
+      .then((snapshot) => {
+        setSessions(Object.values(snapshot.val()));
+      })
+      .then(() => console.log(sessions))
+      .catch((err) => console.log(err));
   };
 
   const getMarkers = () => {
@@ -132,6 +144,21 @@ const AdminMap = () => {
       'line-join': 'round',
     },
   };
+
+  const sessionLayer = {
+    id: 'route',
+    type: 'line',
+    source: 'route',
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+    },
+    paint: {
+      'line-color': '#e53e5e',
+      'line-width': 14,
+    },
+  };
+
   const endLiveStream = () => {
     geolocateRef.current.trigger();
     setIsLive(false);
@@ -153,7 +180,7 @@ const AdminMap = () => {
         {...viewState}
         onMove={(event) => setViewState(event.viewState)}
         onClick={(event) => setDraftPin(event.lngLat)}
-        mapStyle='mapbox://styles/mapbox/streets-v9'
+        mapStyle='mapbox://styles/jmechristian/ck1ogvt4m1ses1brt5xfloncr'
         mapboxAccessToken='pk.eyJ1Ijoiam1lY2hyaXN0aWFuIiwiYSI6ImNsNW9udXBqNzBodDMzam92ZjR1cDNuM3oifQ.1XHdUAzgu6fisMcaHyPTnA'
         ref={mapRef}
       >
@@ -202,6 +229,24 @@ const AdminMap = () => {
                 <ImageMarker />
               </Marker>
             </div>
+          ))}
+        {sessions &&
+          sessions.map((sess, index) => (
+            <Source
+              id='route'
+              type='geojson'
+              key={index}
+              data={{
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: sess.isUserLocation,
+                },
+              }}
+            >
+              <Layer {...sessionLayer} />
+            </Source>
           ))}
       </Map>
       <Box

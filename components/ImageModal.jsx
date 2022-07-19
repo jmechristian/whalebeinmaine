@@ -57,25 +57,31 @@ const ImageModal = ({ mark, imageOpen, imageClose }) => {
             </Box>
             <Flex justifyContent={'space-between'} alignItems='center'>
               <Box
-                backgroundColor={'black'}
+                backgroundColor={'white'}
+                borderColor={'blue.800'}
+                border='1px'
                 borderRadius='50%'
                 padding={'6px'}
+                boxShadow='xl'
                 onClick={moveLeft}
               >
-                <ChevronLeftIcon w='8' h='8' color={'white'} />
+                <ChevronLeftIcon w='8' h='8' color={'blue.800'} />
               </Box>
               <Box my='6'>
-                <Text fontSize={'2xl'} fontWeight={'bold'}>
+                <Text fontSize={'2xl'} color='gray.700' fontWeight={'bold'}>
                   {mark.title}
                 </Text>
               </Box>
               <Box
-                backgroundColor={'black'}
+                backgroundColor={'white'}
+                borderColor={'blue.800'}
+                border='1px'
                 borderRadius='50%'
                 padding={'6px'}
                 onClick={moveRight}
+                boxShadow='xl'
               >
-                <ChevronRightIcon w='8' h='8' color={'white'} />
+                <ChevronRightIcon w='8' h='8' color={'blue.800'} />
               </Box>
             </Flex>
           </Flex>
