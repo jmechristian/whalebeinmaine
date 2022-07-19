@@ -273,6 +273,7 @@ const AdminMap = () => {
         drawerOpen={drawerOpen}
         drawerClose={() => setDrawerOpen(false)}
         clearDraft={() => setDraftPin(null)}
+        getMarks={() => getMarkers()}
       />
     </Box>
   );

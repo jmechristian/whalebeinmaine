@@ -21,7 +21,7 @@ import { ref as ref_database, set } from 'firebase/database';
 const MarkerDrawer = ({
   drawerOpen,
   drawerClose,
-  session,
+  getMarks,
   lat,
   long,
   clearDraft,
@@ -76,6 +76,7 @@ const MarkerDrawer = ({
         setTitle('');
         setFiles(null);
         drawerClose();
+        getMarks();
         clearDraft();
       })
       .catch((error) => {
@@ -124,7 +125,9 @@ const MarkerDrawer = ({
             >
               Cancel
             </Button>
-            <Button onClick={uploadLocation}>Log</Button>
+            <Button onClick={uploadLocation} colorScheme={'blue'}>
+              Submit
+            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
