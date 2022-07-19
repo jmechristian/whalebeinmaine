@@ -25,7 +25,7 @@ const AdminMap = () => {
   const initialView = {
     longitude: -77.438267,
     latitude: 39.0431092,
-    zoom: 12,
+    zoom: 13,
   };
 
   const [isUserLocation, setIsUserLocation] = useState([]);
