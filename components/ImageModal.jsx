@@ -45,9 +45,15 @@ const ImageModal = ({ mark, imageOpen, imageClose }) => {
       <ModalContent bgColor={'white'}>
         <ModalCloseButton />
         <ModalBody>
-          <Flex direction={'column'}>
-            <Box w={'100%'} height='100%'>
-              <Image src={mark.urls[imageIndex]} width='100%' />
+          <Flex direction={'column'} justifyContent='center'>
+            <Box w='100%' textAlign={'center'}>
+              <Image
+                src={mark.urls[imageIndex]}
+                objectFit='contain'
+                objectPosition={'center'}
+                w='100%'
+                maxHeight='80vh'
+              />
             </Box>
             <Flex justifyContent={'space-between'} alignItems='center'>
               <Box
