@@ -15,15 +15,17 @@ import {
 } from '@chakra-ui/react';
 import Map, { GeolocateControl, Source, Layer, Marker } from 'react-map-gl';
 import { database } from '../firebase';
-import { ref, set, onValue } from 'firebase/database';
+import { ref, set, onValue, get, child } from 'firebase/database';
 import MarkerPin from './MarkerPin';
 import MarkerDrawer from './MarkerDrawer';
+import ImageMarker from './ImageMarker';
+import ImageModal from './ImageModal';
 
 const AdminMap = () => {
   const initialView = {
     longitude: -77.438267,
     latitude: 39.0431092,
-    zoom: 11,
+    zoom: 12,
   };
 
   const [isUserLocation, setIsUserLocation] = useState([]);
@@ -33,6 +35,8 @@ const AdminMap = () => {
   const [draftPin, setDraftPin] = useState();
   const [sessionName, setSessionName] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [markers, setMarkers] = useState(null);
+  const [imageModalOpen, setImageModalOpen] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const mapRef = useRef();
@@ -46,6 +50,10 @@ const AdminMap = () => {
     }
   }, [isUserLocation]);
 
+  useEffect(() => {
+    getMarkers();
+  }, []);
+
   const readUserLocations = () => {
     if (sessionName) {
       const locationRef = ref(
@@ -57,6 +65,16 @@ const AdminMap = () => {
         setIsGeometry(data);
       });
     }
+  };
+
+  const getMarkers = () => {
+    const dbMarkerRef = ref(database);
+    get(child(dbMarkerRef, 'markers'))
+      .then((snapshot) => {
+        setMarkers(Object.values(snapshot.val()));
+      })
+      .then(() => console.log(markers))
+      .catch((err) => console.log(err));
   };
 
   const updateUserLocation = useCallback(() => {
@@ -120,6 +138,10 @@ const AdminMap = () => {
     setSessionName('');
   };
 
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+  };
+
   return (
     <Box width='100%' height='100%' position='relative'>
       <Map
@@ -155,16 +177,32 @@ const AdminMap = () => {
           data={geojson}
         >
           <Layer {...layerStyle} />
-          {draftPin && (
-            <Marker
-              latitude={draftPin.lat}
-              longitude={draftPin.lng}
-              onClick={() => setDrawerOpen(true)}
-            >
-              <MarkerPin />
-            </Marker>
-          )}
         </Source>
+        {draftPin && (
+          <Marker
+            latitude={draftPin.lat}
+            longitude={draftPin.lng}
+            onClick={() => setDrawerOpen(true)}
+          >
+            <MarkerPin />
+          </Marker>
+        )}
+        {markers &&
+          markers.map((mark, index) => (
+            <div key={index}>
+              <Marker
+                latitude={mark.lat}
+                longitude={mark.long}
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  setDraftPin(null);
+                  setImageModalOpen(mark);
+                }}
+              >
+                <ImageMarker />
+              </Marker>
+            </div>
+          ))}
       </Map>
       <Box
         height='-moz-max-content'
@@ -194,6 +232,13 @@ const AdminMap = () => {
           </Box>
         </Flex>
       </Box>
+      {imageModalOpen && (
+        <ImageModal
+          imageOpen={imageModalOpen}
+          imageClose={closeImageModal}
+          mark={imageModalOpen}
+        />
+      )}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -223,8 +268,11 @@ const AdminMap = () => {
       </Modal>
       <MarkerDrawer
         session={sessionName}
+        lat={draftPin ? draftPin.lat : ''}
+        long={draftPin ? draftPin.lng : ''}
         drawerOpen={drawerOpen}
         drawerClose={() => setDrawerOpen(false)}
+        clearDraft={() => setDraftPin(null)}
       />
     </Box>
   );
