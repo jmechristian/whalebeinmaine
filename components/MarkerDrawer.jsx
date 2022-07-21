@@ -10,7 +10,7 @@ import {
   DrawerContent,
   DrawerCloseButton,
   Progress,
-  Spacer,
+  Spinner,
   VStack,
 } from '@chakra-ui/react';
 import { database } from '../firebase';
@@ -29,6 +29,7 @@ const MarkerDrawer = ({
   // const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [title, setTitle] = useState('');
+  const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState(null);
   const [urls, setUrls] = useState([]);
   const [percentage, setPercentage] = useState();
@@ -49,7 +50,7 @@ const MarkerDrawer = ({
             // update progress
             setPercentage(percent);
           },
-          (err) => console.log(err),
+          (err) => alert(err),
           () => {
             getDownloadURL(ref(storage, `/${title}/${file.name}`)).then((url) =>
               setUrls((prevArray) => [...prevArray, url])
@@ -65,6 +66,7 @@ const MarkerDrawer = ({
   };
 
   const uploadLocation = () => {
+    setLoading(true);
     set(ref_database(database, `/markers/${title}`), {
       title,
       lat,
@@ -80,8 +82,10 @@ const MarkerDrawer = ({
         clearDraft();
       })
       .catch((error) => {
-        console.log(error);
+        alert(error);
       });
+
+    setLoading(false);
   };
 
   return (
@@ -114,20 +118,26 @@ const MarkerDrawer = ({
           </DrawerBody>
 
           <DrawerFooter>
-            <Button
-              variant='outline'
-              mr={3}
-              onClick={() => {
-                drawerClose();
-                setFiles(null);
-                setTitle('');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={uploadLocation} colorScheme={'blue'}>
-              Submit
-            </Button>
+            {loading ? (
+              <Spinner color='blue.800' size={'xl'} />
+            ) : (
+              <>
+                <Button
+                  variant='outline'
+                  mr={3}
+                  onClick={() => {
+                    drawerClose();
+                    setFiles(null);
+                    setTitle('');
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={uploadLocation} colorScheme={'blue'}>
+                  Submit
+                </Button>
+              </>
+            )}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
