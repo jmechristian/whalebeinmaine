@@ -93,6 +93,7 @@ const AdminMap = () => {
     if (sessionName != '') {
       set(ref(database, `/sessions/${sessionName}`), {
         isUserLocation,
+        date: Date.now(),
       });
     }
 
