@@ -90,10 +90,11 @@ const AdminMap = () => {
   };
 
   const updateUserLocation = useCallback(() => {
+    const date = new Date.now();
     if (sessionName != '') {
-      set(ref(database, `/sessions/${sessionName}`), {
+      set(ref(database, `/sessions/${date}`), {
         isUserLocation,
-        date: Date.now(),
+        session: sessionName,
       });
     }
 
