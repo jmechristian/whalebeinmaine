@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import Map, { GeolocateControl, Source, Layer, Marker } from 'react-map-gl';
 import { database } from '../firebase';
-import { ref, set, onValue, get, child } from 'firebase/database';
+import { ref, set, onValue, get, child, push } from 'firebase/database';
 import MarkerPin from './MarkerPin';
 import MarkerDrawer from './MarkerDrawer';
 import ImageMarker from './ImageMarker';
@@ -29,6 +29,7 @@ const AdminMap = () => {
   };
 
   const [isUserLocation, setIsUserLocation] = useState([]);
+  const [date, setDate] = useState(null);
   const [isGeometry, setIsGeometry] = useState([]);
   const [viewState, setViewState] = useState(initialView);
   const [isLive, setIsLive] = useState(false);
@@ -58,13 +59,11 @@ const AdminMap = () => {
 
   const readUserLocations = () => {
     if (sessionName) {
-      const locationRef = ref(
-        database,
-        `/sessions/${sessionName}/isUserLocation`
-      );
+      const locationRef = ref(database, `/sessions/${date}/isUserLocation`);
       onValue(locationRef, (snapshot) => {
         const data = snapshot.val();
         setIsGeometry(data);
+        console.log('geo' + ' ' + isGeometry);
       });
     }
   };
@@ -75,7 +74,7 @@ const AdminMap = () => {
       .then((snapshot) => {
         setSessions(Object.values(snapshot.val()));
       })
-      .then(() => console.log(sessions))
+      .then(() => console.log('locations' + ' ' + sessions))
       .catch((err) => console.log(err));
   };
 
@@ -85,17 +84,17 @@ const AdminMap = () => {
       .then((snapshot) => {
         setMarkers(Object.values(snapshot.val()));
       })
-      .then(() => console.log(markers))
+      .then(() => console.log('markers' + ' ' + markers))
       .catch((err) => console.log(err));
   };
 
   const updateUserLocation = useCallback(() => {
-    if (sessionName != '') {
-      set(ref(database, `/sessions/${sessionName}`), {
+    if (date) {
+      set(ref(database, `/sessions/${date}`), {
+        session: sessionName ? sessionName : '',
         isUserLocation,
-        date: Date.now(),
       });
-    }
+    } else return;
 
     setIsGeometry(isUserLocation);
   }, [isUserLocation]);
@@ -155,8 +154,8 @@ const AdminMap = () => {
       'line-cap': 'round',
     },
     paint: {
-      'line-color': '#e53e5e',
-      'line-width': 14,
+      'line-color': '#50C878',
+      'line-width': 18,
     },
   };
 
@@ -168,6 +167,14 @@ const AdminMap = () => {
 
   const closeImageModal = () => {
     setImageModalOpen(false);
+  };
+
+  const addNewSession = () => {
+    const newDate = Date.now();
+    setDate(newDate);
+    set(ref(database, `sessions/${newDate}`), {
+      session: sessionName ? sessionName : '',
+    });
   };
 
   return (
@@ -196,7 +203,10 @@ const AdminMap = () => {
               [evt.coords.longitude, evt.coords.latitude],
             ]);
             updateUserLocation();
+            console.log('geolocate');
           }}
+          onTrackUserLocationStart={addNewSession}
+          onTrackUserLocationEnd={() => console.log('track end')}
         />
         <Source
           id='gradient-line'
