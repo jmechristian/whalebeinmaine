@@ -65,11 +65,11 @@ const MarkerDrawer = ({
     }
   };
 
-  const uploadLocation = () => {
+  const uploadLocation = async () => {
     const date = Date.now();
 
     setLoading(true);
-    set(ref_database(database, `/markers/${date}`), {
+    await set(ref_database(database, `/markers/${date}`), {
       title,
       lat,
       long,
@@ -82,12 +82,11 @@ const MarkerDrawer = ({
         drawerClose();
         getMarks();
         clearDraft();
+        setLoading(false);
       })
       .catch((error) => {
         alert(error);
       });
-
-    setLoading(false);
   };
 
   return (
