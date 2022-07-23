@@ -66,8 +66,10 @@ const MarkerDrawer = ({
   };
 
   const uploadLocation = () => {
+    const date = Date.now();
+
     setLoading(true);
-    set(ref_database(database, `/markers/${title}`), {
+    set(ref_database(database, `/markers/${date}`), {
       title,
       lat,
       long,
