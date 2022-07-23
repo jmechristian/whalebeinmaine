@@ -50,7 +50,7 @@ const AdminMap = () => {
       console.log(isUserLocation);
       console.log(sessionName);
     }
-  }, [isUserLocation]);
+  }, [isUserLocation, sessions]);
 
   useEffect(() => {
     getMarkers();
@@ -68,14 +68,16 @@ const AdminMap = () => {
     }
   };
 
-  const getLocations = () => {
+  const getLocations = async () => {
     const dbMarkerRef = ref(database);
-    get(child(dbMarkerRef, 'sessions'))
+    const sess = await get(child(dbMarkerRef, 'sessions'))
       .then((snapshot) => {
-        setSessions(Object.values(snapshot.val()));
+        const data = Object.values(snapshot.val());
+        return data;
       })
-      .then(() => console.log('locations' + ' ' + sessions))
       .catch((err) => console.log(err));
+
+    setSessions(sess);
   };
 
   const getMarkers = () => {
@@ -155,7 +157,7 @@ const AdminMap = () => {
     },
     paint: {
       'line-color': '#50C878',
-      'line-width': 18,
+      'line-width': 30,
     },
   };
 
@@ -240,24 +242,6 @@ const AdminMap = () => {
                 <ImageMarker />
               </Marker>
             </div>
-          ))}
-        {sessions &&
-          sessions.map((sess, index) => (
-            <Source
-              id='route'
-              type='geojson'
-              key={index}
-              data={{
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                  type: 'LineString',
-                  coordinates: sess.isUserLocation,
-                },
-              }}
-            >
-              <Layer {...sessionLayer} />
-            </Source>
           ))}
       </Map>
       <Box
